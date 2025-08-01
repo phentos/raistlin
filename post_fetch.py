@@ -3,6 +3,10 @@ import discord, traceback
 
 
 class PostFetch(discord.ui.Modal, title='Post Fetch'):
+    def __init__(self, handler=None):
+        super().__init__()
+        self.handler = handler
+
     postTitle = discord.ui.TextInput(
         label='Title',
         style=discord.TextStyle.short,
@@ -28,7 +32,6 @@ Then replace me (as well as much space as you need)"""
         style=discord.TextStyle.paragraph,
         default=postContentDefault,
         required=True,
-        max_length=200
     )
     
     postTimes = discord.ui.TextInput(
@@ -40,7 +43,16 @@ Then replace me (as well as much space as you need)"""
 	)
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.send_message(f'Looking forward to {self.postTitle.value}!', ephemeral=False)
+        await interaction.response.defer(ephemeral=True)
+        if self.handler:
+            try:
+                await self.handler(self, interaction)
+                await interaction.followup.send(f'Nice, we handled {self.postTitle.value}!', ephemeral=True)
+            except Exception as e:
+                await interaction.followup.send(f'SHIT! We tried the handler but something bad happened.', ephemeral=True)
+                traceback.print_exception(type(e), e, e.__traceback__)
+        else:
+            await interaction.followup.send(f'SHIT! No handler for {self.postTitle.value}!', ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message('Oops! Something went wrong.', ephemeral=False)
