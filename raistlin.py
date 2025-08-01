@@ -34,6 +34,7 @@ client = MyClient()
 @client.tree.command(guild=GUILD, description="Start a crosspost")
 async def conjure(interaction: discord.Interaction):
     postFields = {}
+
     async def fetchHandler(m, i, d=postFields):
         d['title'] = m.postTitle.value
         d['location'] = m.postLocation.value
@@ -41,9 +42,9 @@ async def conjure(interaction: discord.Interaction):
         d['times'] = m.postTimes.value
         d['interaction'] = i
 
-    await interaction.response.send_modal(PostFetch(fetchHandler))
+        print(d)
 
-    print(postFields)
+    await interaction.response.send_modal(PostFetch(fetchHandler))
 
 
 if __name__ == "__main__":
